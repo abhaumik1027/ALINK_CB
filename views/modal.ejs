@@ -1,0 +1,26 @@
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit A-Links</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="/editUrl" method="POST" class="my-4">
+        <div class="modal-body">
+          <label for="fullUrl" class="sr-only">Url</label>
+          <input required type="string" type="url" name="fullUrl" id="fullUrl" class="form-control col mr-2" />
+          <div>&nbsp;</div>
+          <label for="shortUrl" class="sr-only">A-Link</label>
+          <input required type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2" />
+          <input type="hidden" name="linkID" id="linkID" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button class="btn btn-success" type="submit">Save</button>
+        </div></form>
+      </div>
+    </div>
+  </div>

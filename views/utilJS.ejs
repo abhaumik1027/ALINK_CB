@@ -1,0 +1,51 @@
+<script type='text/javascript'>
+    
+    //EDIT Modal
+    $('#exampleModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever')
+        const myArray = recipient.split(",");
+        var modal = $(this)
+        modal.find('.modal-body #fullUrl').val(myArray[0])
+        modal.find('.modal-body #shortUrl').val(myArray[1])
+        modal.find('.modal-body #linkID').val(myArray[2])
+    })
+
+    //Alert Modal
+    $('#exampleModalAlert').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('whatever')
+        const myArray = recipient.split(",");
+        var modal = $(this)
+        modal.find('.modal-body #fullUrl').val(myArray[0])
+        modal.find('.modal-body #shortUrl').val(myArray[1])
+        modal.find('.modal-body #linkID').val(myArray[2])
+    })
+    
+    //Function for enhanced search
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    }; 
+
+    var $rows = $('#searchable tbody tr');
+    $('#search').keyup(debounce(function() {
+        var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+        $rows.show().filter(function() {
+            var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+            return !~text.indexOf(val);
+        }).hide();
+    }, 300));
+
+
+</script>

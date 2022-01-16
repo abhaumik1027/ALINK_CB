@@ -1,0 +1,62 @@
+<%- include('header')%>
+<body>
+  <div class="container padt2">
+    <h1>A-LINKS</h1>
+
+        <%- include('infoBox')%>
+        <%- include('createForm')%>
+        <div class="my-4"><input type="text" id="search" placeholder="Type to search" class="form-control col mr-2"></div>
+        <table id="searchable" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Full URL</th>
+              <th>A-Links</th>
+              <th>Clicks</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody style="font-family: 'Poppins', sans-serif;">
+            <% shortUrls.forEach(shortUrl => { %> 
+              <tr class="search">
+                <td><div style="max-width:450px; text-overflow: ellipsis; overflow:hidden; white-space: nowrap;display: block; line-height: 2em;">
+                    <a style="text-decoration: none;" href="<%= shortUrl.full %>"><%= shortUrl.full %></a>
+                </div></td>
+                <td><a style="text-decoration: none;" href="<%= shortUrl.short %>"><%= shortUrl.short %></a></td>
+                <td><%= shortUrl.clicks %></td>
+                <td><%= shortUrl.date %></td>
+                <td>
+                  <form class="form-inline">
+                    <button class="btn btn-success" type="button" data-toggle="modal" 
+                            data-target="#exampleModalAlert" data-whatever="<%= shortUrl.full %>,<%= shortUrl.short %>,<%= shortUrl.linkID %>">
+                      Delete
+                    </button>
+              
+                    <div>&nbsp;&nbsp;&nbsp;</div>
+                    <button class="btn btn-success" type="button" data-toggle="modal" 
+                            data-target="#exampleModal" data-whatever="<%= shortUrl.full %>,<%= shortUrl.short %>,<%= shortUrl.linkID %>">
+                      Edit
+                    </button>
+                  </form>
+              
+                 </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+                
+        <!-- Edit Modal -->
+        <%- include('modal')%>
+        <!-- Modal --> 
+
+        <!-- Delete Modal -->
+        <%- include('alert')%>
+        <!-- Modal -->    
+  
+      </div>
+      <%- include('utilJS')%> 
+     
+    
+</body>
+</html>             
+  
