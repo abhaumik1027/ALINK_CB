@@ -25,7 +25,7 @@ app.get("/", async function (req, res) {
 
     let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
     if (shortUrls.rows.length > 0) {
-       res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'render' })
+       res.render('index', { shortUrls: shortUrls.rows, message: 'render' })
     }
 });
 
@@ -34,7 +34,7 @@ app.post('/shortUrls', async function (req, res) {
     // Check  if url is valid
     if (!validUrl(req.body.fullUrl)) {
         let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'invalid_url' })
+        res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
     }
     //Check if url exists
     else {
@@ -44,11 +44,11 @@ app.post('/shortUrls', async function (req, res) {
             
             if (lResult.rows.length > 0) {
                 let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'url_exists' })
+                res.render('index', { shortUrls: shortUrls.rows, message: 'url_exists' })
             }
             else if (sResult.rows.length > 0) {
                 let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'alink_exists' })
+                res.render('index', { shortUrls: shortUrls.rows, message: 'alink_exists' })
             }
             else {
                 let hashids = new Hashids();
@@ -57,13 +57,17 @@ app.post('/shortUrls', async function (req, res) {
                     full: req.body.fullUrl,
                     short: req.body.shortUrl,
                     clicks: 0,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString(),
+                    tag: req.body.tag,
+                    creator: "Ani Bhaumik"
                 }
-                await collection.upsert(response.linkID, response, function (error, result) {
+                await collection.upsert(response.linkID, response, async function (error, result) {
                     if (error) {
                         return res.status(400).send(error);
+                    } else {
+                        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+                        res.render('index', { shortUrls: shortUrls.rows, message: 'alink_added' })
                     }
-                    res.redirect('/')
                 });
             }
         }
@@ -85,7 +89,32 @@ app.get('/:shortUrl', async function (req, res){
     }
     else {
         let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'search' })
+        res.render('index', { shortUrls: shortUrls.rows, message: 'search' })
+    }
+})
+
+//Get `by tags
+app.get('/tag/:tag', async function (req, res){
+    let tag = req.params.tag.toUpperCase();
+    let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag = '" + tag + "'");
+    if (resUrl.rows.length > 0) {
+        res.render('index', { shortUrls: resUrl.rows, message: '' })
+    }
+    else {
+        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+        res.render('index', { shortUrls: shortUrls.rows, message: 'no_tag' })
+    }
+})
+
+//Get `by tags
+app.get('/creator/:creator', async function (req, res) {
+    let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE creator LIKE '%" + req.params.creator +"%'");
+    if (resUrl.rows.length > 0) {
+        res.render('index', { shortUrls: resUrl.rows, message: '' })
+    }
+    else {
+        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+        res.render('index', { shortUrls: shortUrls.rows, message: 'no_author' })
     }
 })
 
@@ -94,7 +123,8 @@ app.post('/delUrl', async function (req, res){
 
     try {
         await cluster.query("DELETE FROM `" + bucket._name + "`  WHERE linkID = '" + req.body.linkID + "'");
-        res.redirect('/')
+        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+        res.render('index', { shortUrls: shortUrls.rows, message: 'alink_deleted' })
     }
     catch (err) {
         res.status(500).json('Server error');
@@ -106,14 +136,16 @@ app.post('/editUrl', async function (req, res){
 
     if (!validUrl(req.body.fullUrl)) {
         let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, shortUrlss: 'invalid_url' })
+        res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
     }
     else {
         try {
-            
-            await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" +
-                new Date().toLocaleDateString() + "'  WHERE linkID = '" + req.body.linkID + "'");
-            res.redirect('/')
+            let creator = "Ani Bhaumik";
+            await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
+
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+
+            res.render('index', { shortUrls: shortUrls.rows, message: 'alink_updated' })
             
         }
         catch (err) {

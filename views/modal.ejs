@@ -9,18 +9,26 @@
           </button>
         </div>
         <form action="/editUrl" method="POST" class="my-4">
-        <div class="modal-body">
-          <label for="fullUrl" class="sr-only">Url</label>
-          <input required type="string" type="url" name="fullUrl" id="fullUrl" class="form-control col mr-2" />
-          <div>&nbsp;</div>
-          <label for="shortUrl" class="sr-only">A-Link</label>
-          <input required type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2" />
-          <input type="hidden" name="linkID" id="linkID" />
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button class="btn btn-success" type="submit">Save</button>
-        </div></form>
+            <div class="modal-body">
+              <label for="fullUrl" class="sr-only">Url</label>
+              <input required type="string" type="url" name="fullUrl" id="fullUrl" class="form-control col mr-2" />
+              <div>&nbsp;</div>
+              <label for="shortUrl" class="sr-only">A-Link</label>
+              <input required type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2" />
+              <input type="hidden" name="linkID" id="linkID" />
+              <div>&nbsp;</div>
+              <select name="tag" id="tag" class="selectpicker" >
+                <option data-content="<span class='badge badge-primary'>GENERAL</span>">GENERAL</option>
+                <option data-content="<span class='badge badge-secondary'>DATABASE</span>">DATABASE</option>
+                <option data-content="<span class='badge badge-danger'>SECURITY</span>">SECURITY</option>
+                <option data-content="<span class='badge badge-success'>USER INTERFACE</span>">USER INTERFACE</option>
+            </select>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button class="btn btn-success" type="submit">Save</button>
+            </div>
+		</form>
       </div>
     </div>
   </div>
