@@ -4,6 +4,7 @@ var Express = require("express");
 var BodyParser = require("body-parser");
 var Hashids = require("hashids");
 
+
 // User Creds.
 var endpoint = 'cb.tisntgxbzgvsjjcn.cloud.couchbase.com'
 var username = 'alink'
@@ -24,6 +25,7 @@ app.set('view engine', 'ejs');
 //Load the table
 app.get("/", async function (req, res) {
     try {
+        
         let message = ""
         let searchStr = ""
         if (app.get('message')){
