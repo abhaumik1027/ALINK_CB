@@ -3,7 +3,7 @@ var Couchbase = require("couchbase");
 var Express = require("express");
 var BodyParser = require("body-parser");
 var Hashids = require("hashids");
-
+var os = require("os");
 
 // User Creds.
 var endpoint = 'cb.tisntgxbzgvsjjcn.cloud.couchbase.com'
@@ -25,7 +25,7 @@ app.set('view engine', 'ejs');
 //Load the table
 app.get("/", async function (req, res) {
     try {
-        
+        console.log(os.userInfo().username)
         let message = ""
         let searchStr = ""
         if (app.get('message')){
@@ -70,7 +70,7 @@ app.post('/shortUrls', async function (req, res) {
                 let hashids = new Hashids();
                 let linkID = hashids.encode((new Date).getTime())
                 let clicks = 0
-                let creator = "Ani Bhaumik"
+                let creator = os.userInfo().username
 
                 let qs = await cluster.query("INSERT into `" + bucket._name + "` (KEY, VALUE) VALUES(\"" + linkID
                     + "\", {\"linkID\": \"" + linkID + "\" , \"full\": \"" + req.body.fullUrl + "\" , \"short\": \"" + req.body.shortUrl
@@ -176,7 +176,7 @@ app.post('/editUrl', async function (req, res){
         }
         else {
             
-            let creator = "Ani Bhaumik";
+            let creator = os.userInfo().username;
             await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
             app.set('message', 'alink_updated')
             res.redirect('/');
