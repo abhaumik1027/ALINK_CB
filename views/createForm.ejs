@@ -1,8 +1,14 @@
 <form action="/shortUrls" method="POST" class="my-4 form-inline">
     <label for="fullUrl" class="sr-only">Url</label>
     <input required placeholder="Url" type="url" name="fullUrl" id="fullUrl" class="form-control col mr-2">
-    <label for="shortUrl" class="sr-only">A-Link</label>
-    <input required placeholder="A-link" type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2">
+    
+	<label for="shortUrl" class="sr-only">A-Link</label>
+    <% if(searchStr.length > 0) { %>
+	    <input required value="<%=searchStr %>" type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2">
+	<% } else { %>
+		<input required="" placeholder="A-link" type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2">
+	<% } %>
+		
     <select name="tag" id="tag" class="selectpicker" >
         <option data-content="<span class='badge badge-primary'>GENERAL</span>">GENERAL</option>
         <option data-content="<span class='badge badge-secondary'>DATABASE</span>">DATABASE</option>

@@ -18,13 +18,24 @@ var app = Express();
 
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
+app.use(Express.static('public'));
 app.set('view engine', 'ejs');
 
 //Load the table
 app.get("/", async function (req, res) {
     try {
+        let message = ""
+        let searchStr = ""
+        if (app.get('message')){
+            message = app.get('message')
+        }
+
+        if (app.get('urlSearch')) {
+            searchStr = app.get('urlSearch')
+        }
         let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'render' })
+        res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr })
+        
     }
     catch (err) {
         console.error(err);
@@ -64,8 +75,11 @@ app.post('/shortUrls', async function (req, res) {
                     + "\", \"clicks\": TONUMBER(\"" + clicks + "\"), \"date\": \"" + new Date().toLocaleDateString()
                     + "\", \"tag\": \"" + req.body.tag + "\", \"creator\": \"" + creator + "\"})")
 
-                let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                res.render('index', { shortUrls: shortUrls.rows, message: 'alink_added' })
+                app.set('message', 'alink_added')
+                if (app.get('urlSearch')) {
+                    app.set('urlSearch', "")
+                }
+                res.redirect('/');
                 
             }
         }
@@ -86,8 +100,11 @@ app.get('/:shortUrl', async function (req, res){
             res.redirect(resUrl.rows[0].full);
         }
         else {
-            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-            res.render('index', { shortUrls: shortUrls.rows, message: 'search' })
+            if (req.params.shortUrl != 'favicon.ico') {
+                app.set('urlSearch', req.params.shortUrl)
+                app.set('message', 'search')
+                res.redirect('/');
+            }
         }
     }
     catch (err) {
@@ -100,13 +117,13 @@ app.get('/:shortUrl', async function (req, res){
 app.get('/tag/:tag', async function (req, res){
     try {
         let tag = req.params.tag.toUpperCase();
-        let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag = '" + tag + "'");
+        let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
         if (resUrl.rows.length > 0) {
-            res.render('index', { shortUrls: resUrl.rows, message: '' })
+            res.redirect('/');
         }
         else {
-            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-            res.render('index', { shortUrls: shortUrls.rows, message: 'no_tag' })
+            app.set('message', 'no_tag')
+            res.redirect('/');
         }
     }
     catch (err) {
@@ -123,13 +140,13 @@ app.get('/creator/:creator', async function (req, res) {
             res.render('index', { shortUrls: resUrl.rows, message: '' })
         }
         else {
-            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-            res.render('index', { shortUrls: shortUrls.rows, message: 'no_author' })
+            app.set('message', 'no_author')
+            res.redirect('/');
         }
     }
         catch (err) {
         console.error(err);
-        res.status(500).json('Error while get by creator');
+        res.status(500).json('Error while fetching by creator');
     }
 })
 
@@ -138,8 +155,8 @@ app.post('/delUrl', async function (req, res){
 
     try {
         await cluster.query("DELETE FROM `" + bucket._name + "`  WHERE linkID = '" + req.body.linkID + "'");
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'alink_deleted' })
+        app.set('message', 'alink_deleted')
+        res.redirect('/');
     }
     catch (err) {
         console.error(err);
@@ -152,15 +169,15 @@ app.post('/editUrl', async function (req, res){
 
     try {
         if (!validUrl(req.body.fullUrl)) {
-            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-            res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
+            app.set('message', 'invalid_url')
+            res.redirect('/');
         }
         else {
             
             let creator = "Ani Bhaumik";
             await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
-            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-            res.render('index', { shortUrls: shortUrls.rows, message: 'alink_updated' })
+            app.set('message', 'alink_updated')
+            res.redirect('/');
             
         }
             
