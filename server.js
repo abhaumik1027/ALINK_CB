@@ -22,10 +22,13 @@ app.set('view engine', 'ejs');
 
 //Load the table
 app.get("/", async function (req, res) {
-
-    let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-    if (shortUrls.rows.length > 0) {
-       res.render('index', { shortUrls: shortUrls.rows, message: 'render' })
+    try {
+        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+        res.render('index', { shortUrls: shortUrls.rows, message: 'render' })
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json('Error while populating the Alinks.');
     }
 });
 
@@ -52,69 +55,81 @@ app.post('/shortUrls', async function (req, res) {
             }
             else {
                 let hashids = new Hashids();
-                let response = {
-                    linkID: hashids.encode((new Date).getTime()),
-                    full: req.body.fullUrl,
-                    short: req.body.shortUrl,
-                    clicks: 0,
-                    date: new Date().toLocaleDateString(),
-                    tag: req.body.tag,
-                    creator: "Ani Bhaumik"
-                }
-                await collection.upsert(response.linkID, response, async function (error, result) {
-                    if (error) {
-                        return res.status(400).send(error);
-                    } else {
-                        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                        res.render('index', { shortUrls: shortUrls.rows, message: 'alink_added' })
-                    }
-                });
+                let linkID = hashids.encode((new Date).getTime())
+                let clicks = 0
+                let creator = "Ani Bhaumik"
+
+                let qs = await cluster.query("INSERT into `" + bucket._name + "` (KEY, VALUE) VALUES(\"" + linkID
+                    + "\", {\"linkID\": \"" + linkID + "\" , \"full\": \"" + req.body.fullUrl + "\" , \"short\": \"" + req.body.shortUrl
+                    + "\", \"clicks\": TONUMBER(\"" + clicks + "\"), \"date\": \"" + new Date().toLocaleDateString()
+                    + "\", \"tag\": \"" + req.body.tag + "\", \"creator\": \"" + creator + "\"})")
+
+                let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+                res.render('index', { shortUrls: shortUrls.rows, message: 'alink_added' })
+                
             }
         }
         catch (err) {
             console.error(err);
-            res.status(500).json('Server error');
+            res.status(500).json('Error while creating Alinks');
         }
     }
 })
 
 //Direct a alink to the long url
 app.get('/:shortUrl', async function (req, res){
-
-    let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.params.shortUrl + "'");
-    let status = '';
-    if (resUrl.rows.length > 0) {
-        await cluster.query("UPDATE `" + bucket._name + "`  SET  clicks = clicks + 1 WHERE short = '" + req.params.shortUrl + "'");
-        res.redirect(resUrl.rows[0].full);
+    try {
+        let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.params.shortUrl + "'");
+        let status = '';
+        if (resUrl.rows.length > 0) {
+            await cluster.query("UPDATE `" + bucket._name + "`  SET  clicks = clicks + 1 WHERE short = '" + req.params.shortUrl + "'");
+            res.redirect(resUrl.rows[0].full);
+        }
+        else {
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+            res.render('index', { shortUrls: shortUrls.rows, message: 'search' })
+        }
     }
-    else {
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'search' })
+    catch (err) {
+        console.error(err);
+        res.status(500).json('Error while redirecting');
     }
 })
 
 //Get `by tags
 app.get('/tag/:tag', async function (req, res){
-    let tag = req.params.tag.toUpperCase();
-    let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag = '" + tag + "'");
-    if (resUrl.rows.length > 0) {
-        res.render('index', { shortUrls: resUrl.rows, message: '' })
+    try {
+        let tag = req.params.tag.toUpperCase();
+        let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag = '" + tag + "'");
+        if (resUrl.rows.length > 0) {
+            res.render('index', { shortUrls: resUrl.rows, message: '' })
+        }
+        else {
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+            res.render('index', { shortUrls: shortUrls.rows, message: 'no_tag' })
+        }
     }
-    else {
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'no_tag' })
+    catch (err) {
+        console.error(err);
+        res.status(500).json('Error while get by tag');
     }
 })
 
-//Get `by tags
+//Get `by creator
 app.get('/creator/:creator', async function (req, res) {
-    let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE creator LIKE '%" + req.params.creator +"%'");
-    if (resUrl.rows.length > 0) {
-        res.render('index', { shortUrls: resUrl.rows, message: '' })
+    try {
+        let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE creator LIKE '%" + req.params.creator + "%'");
+        if (resUrl.rows.length > 0) {
+            res.render('index', { shortUrls: resUrl.rows, message: '' })
+        }
+        else {
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+            res.render('index', { shortUrls: shortUrls.rows, message: 'no_author' })
+        }
     }
-    else {
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'no_author' })
+        catch (err) {
+        console.error(err);
+        res.status(500).json('Error while get by creator');
     }
 })
 
@@ -127,30 +142,32 @@ app.post('/delUrl', async function (req, res){
         res.render('index', { shortUrls: shortUrls.rows, message: 'alink_deleted' })
     }
     catch (err) {
-        res.status(500).json('Server error');
+        console.error(err);
+        res.status(500).json('Error while deleting alink');
     }
 })
 
 //Edit an alink
 app.post('/editUrl', async function (req, res){
 
-    if (!validUrl(req.body.fullUrl)) {
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
-    }
-    else {
-        try {
+    try {
+        if (!validUrl(req.body.fullUrl)) {
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+            res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
+        }
+        else {
+            
             let creator = "Ani Bhaumik";
             await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
-
             let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-
             res.render('index', { shortUrls: shortUrls.rows, message: 'alink_updated' })
             
         }
-        catch (err) {
-            res.status(500).json('Server error');
-        }
+            
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json('Error while editing alink');
     }
 })
 
