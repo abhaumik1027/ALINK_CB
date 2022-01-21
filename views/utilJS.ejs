@@ -9,6 +9,7 @@
         modal.find('.modal-body #fullUrl').val(myArray[0])
         modal.find('.modal-body #shortUrl').val(myArray[1])
         modal.find('.modal-body #linkID').val(myArray[2])
+        modal.find('.modal-body #tag').val(myArray[3])
     })
 
     //Alert Modal
@@ -26,6 +27,10 @@
    $(document).ready(function(){
         $('#sortTab').dataTable();
     });
+
+    $(".js-example-tags").select2({
+        tags: true
+    })
 
 
 

@@ -11,13 +11,12 @@
   "dependencies": {
     "body-parser": "^1.19.1",
     "config": "^3.3.6",
-    "couchbase": "^3.2.4",
     "ejs": "^3.1.6",
     "express": "^4.17.2",
-    "fr-dialogmodal": "^1.0.4",
     "hashids": "^2.2.10",
-    "os": "^0.1.2",
-    "valid_url": "^1.1.1"
+    "valid_url": "^1.1.1",
+    "couchbase": "^3.2.4",
+    "os": "^0.1.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

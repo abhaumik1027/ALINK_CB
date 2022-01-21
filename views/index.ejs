@@ -1,6 +1,5 @@
 <%- include('header')%>
 <body style="font-family: 'Prompt', sans-serif;">
-  
   <div class="container padt2">
     <div><img src="alinksColor.svg" width="300" height="80"/></div>
     <div class="container bg-light padtsm">
@@ -8,7 +7,6 @@
         <div class="container"><%- include('createForm')%></div>
         
     </div>
-    
     <div class='padtsm'></div>        
 
         <table id="sortTab" class="table table-striped">
@@ -16,39 +14,51 @@
             <tr>
               <th>Full URL</th>
               <th>A-Links</th>
-              <th>Creator</th>
               <th>Clicks</th>
               <th>Date</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <% shortUrls.forEach(shortUrl => { %> 
+            <%
+              
+              shortUrls.forEach(shortUrl => { %> 
               <tr class="search">
                 <td><div class='col-ellip'>
                     <a style="text-decoration: none;" href="<%= shortUrl.full %>"><%= shortUrl.full %></a>
                 </div>
                 <% 
                   let tagClass = "";
-                  if(shortUrl.tag == 'GENERAL') {
+                  if(shortUrl.tag.toUpperCase().includes("GENERAL")) {
                     tagClass = "badge-primary";
                   } 
-                  if(shortUrl.tag == 'DATABASE') {
+                  if(shortUrl.tag.toUpperCase().includes("DATA")) {
                     tagClass = "badge-secondary";
                   } 
-                  if(shortUrl.tag == 'SECURITY') {
+                  if(shortUrl.tag.toUpperCase().includes("SECURITY")) {
                     tagClass = "badge-danger";
                   } 
-                  if(shortUrl.tag == 'USER INTERFACE') {
+                  if(shortUrl.tag.toUpperCase().includes("USER")) {
                     tagClass = "badge-success";
+                  }
+                  if(shortUrl.tag.toUpperCase().includes("EXT")) {
+                    tagClass = "badge-warning";
                   } 
+                  if(shortUrl.tag.toUpperCase().includes("RESOURCE")) {
+                    tagClass = "badge-info";
+                  } 
+                  if(shortUrl.tag.toUpperCase().includes("TECH")) {
+                    tagClass = "badge-dark";
+                  } 
+                  if(shortUrl.tag.toUpperCase().includes("TEST")) {
+                    tagClass = "badge-light";
+                  }  
                   
               %> 
 
               <span class="badge <%= tagClass %> badge-pill"><%= shortUrl.tag %></span>
               </td>
                 <td><a style="text-decoration: none;" href="<%= shortUrl.short %>"><%= shortUrl.short %></a></td>
-                <td class='creator-col-ellip'><%= shortUrl.creator %></td>
                 <td><%= shortUrl.clicks %></td>
                 <td><%= shortUrl.date %></td>
                 <td>
@@ -63,7 +73,7 @@
               
                     
                     <a class="btn" type="button" data-toggle="modal" 
-                      data-target="#exampleModal" data-whatever="<%= shortUrl.full %>,<%= shortUrl.short %>,<%= shortUrl.linkID %>">
+                      data-target="#exampleModal" data-whatever="<%= shortUrl.full %>,<%= shortUrl.short %>,<%= shortUrl.linkID %>,<%= shortUrl.tag %>"">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#056608" class="bi bi-pencil-square" viewBox="0 0 16 16">
                         <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
                         <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>

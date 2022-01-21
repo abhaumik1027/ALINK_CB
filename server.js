@@ -25,18 +25,31 @@ app.set('view engine', 'ejs');
 //Load the table
 app.get("/", async function (req, res) {
     try {
-        console.log(os.userInfo().username)
         let message = ""
         let searchStr = ""
-        if (app.get('message')){
-            message = app.get('message')
+
+             
+        if (app.get('callinIn')){
+                searchStr = app.get('urlSearch')
+                message = app.get('message')
+                app.set('callinIn', '')
+           
         }
 
-        if (app.get('urlSearch')) {
-            searchStr = app.get('urlSearch')
+       
+        let tagDetails = await cluster.query("SELECT DISTICT(`" + bucket._name + "`.tag) FROM `" + bucket._name + "` order by tag");
+        //Load the table with the searched tag
+        if(app.get('tag')){
+            let tag = app.get('tag')
+            
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
+            app.set('tag', '')
+            res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows})
         }
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr })
+        else{
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
+            res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows })
+        }
         
     }
     catch (err) {
@@ -49,24 +62,34 @@ app.get("/", async function (req, res) {
 app.post('/shortUrls', async function (req, res) {
     // Check  if url is valid
     if (!validUrl(req.body.fullUrl)) {
-        let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-        res.render('index', { shortUrls: shortUrls.rows, message: 'invalid_url' })
+        
+        app.set('message', 'invalid_url')
+        app.set('urlSearch', '')
+        app.set('callinIn', 'callinIn')
+        res.redirect('/');
+        
     }
-    //Check if url exists
+    //Check if url/alink exists
     else {
         try {
             let lResult = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE full = '" + req.body.fullUrl + "'");
             let sResult = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.body.shortUrl + "'");
             
             if (lResult.rows.length > 0) {
-                let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                res.render('index', { shortUrls: shortUrls.rows, message: 'url_exists' })
+                app.set('message', 'url_exists')
+                app.set('urlSearch', '')
+                app.set('callinIn', 'callinIn')
+                res.redirect('/');
             }
+            
             else if (sResult.rows.length > 0) {
-                let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
-                res.render('index', { shortUrls: shortUrls.rows, message: 'alink_exists' })
+                app.set('message', 'alink_exists')
+                app.set('urlSearch', '')
+                app.set('callinIn', 'callinIn')
+                res.redirect('/');
             }
-            else {
+            
+            else{
                 let hashids = new Hashids();
                 let linkID = hashids.encode((new Date).getTime())
                 let clicks = 0
@@ -78,12 +101,12 @@ app.post('/shortUrls', async function (req, res) {
                     + "\", \"tag\": \"" + req.body.tag + "\", \"creator\": \"" + creator + "\"})")
 
                 app.set('message', 'alink_added')
-                if (app.get('urlSearch')) {
-                    app.set('urlSearch', "")
-                }
+                app.set('urlSearch', '')
+                app.set('callinIn', 'callinIn')
                 res.redirect('/');
-                
             }
+           
+            
         }
         catch (err) {
             console.error(err);
@@ -105,6 +128,7 @@ app.get('/:shortUrl', async function (req, res){
             if (req.params.shortUrl != 'favicon.ico') {
                 app.set('urlSearch', req.params.shortUrl)
                 app.set('message', 'search')
+                app.set('callinIn', 'callinIn')
                 res.redirect('/');
             }
         }
@@ -121,10 +145,16 @@ app.get('/tag/:tag', async function (req, res){
         let tag = req.params.tag.toUpperCase();
         let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
         if (resUrl.rows.length > 0) {
+            app.set('tag', tag)
+            app.set('urlSearch', '')
+            app.set('message', '')
+            app.set('callinIn', 'callinIn')
             res.redirect('/');
         }
         else {
             app.set('message', 'no_tag')
+            app.set('urlSearch', '')
+            app.set('callinIn', 'callinIn')
             res.redirect('/');
         }
     }
@@ -134,8 +164,8 @@ app.get('/tag/:tag', async function (req, res){
     }
 })
 
-//Get `by creator
-app.get('/creator/:creator', async function (req, res) {
+//Get `by creator : We need to find a way out to get the username without login
+/*app.get('/creator/:creator', async function (req, res) {
     try {
         let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE creator LIKE '%" + req.params.creator + "%'");
         if (resUrl.rows.length > 0) {
@@ -150,7 +180,7 @@ app.get('/creator/:creator', async function (req, res) {
         console.error(err);
         res.status(500).json('Error while fetching by creator');
     }
-})
+})*/
 
 //Delete an alink
 app.post('/delUrl', async function (req, res){
@@ -158,6 +188,8 @@ app.post('/delUrl', async function (req, res){
     try {
         await cluster.query("DELETE FROM `" + bucket._name + "`  WHERE linkID = '" + req.body.linkID + "'");
         app.set('message', 'alink_deleted')
+        app.set('urlSearch', '')
+        app.set('callinIn', 'callinIn')
         res.redirect('/');
     }
     catch (err) {
@@ -172,6 +204,8 @@ app.post('/editUrl', async function (req, res){
     try {
         if (!validUrl(req.body.fullUrl)) {
             app.set('message', 'invalid_url')
+            app.set('urlSearch', '')
+            app.set('callinIn', 'callinIn')
             res.redirect('/');
         }
         else {
@@ -179,6 +213,8 @@ app.post('/editUrl', async function (req, res){
             let creator = os.userInfo().username;
             await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
             app.set('message', 'alink_updated')
+            app.set('urlSearch', '')
+            app.set('callinIn', 'callinIn')
             res.redirect('/');
             
         }
