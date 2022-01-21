@@ -12,17 +12,21 @@
             <div class="modal-body">
               <label for="fullUrl" class="sr-only">Url</label>
               <input required type="string" type="url" name="fullUrl" id="fullUrl" class="form-control col mr-2" />
-              <div>&nbsp;</div>
+			  <input type="hidden" name="prevFullUrl" id="prevFullUrl" />
+				  <div>&nbsp;</div>
               <label for="shortUrl" class="sr-only">A-Link</label>
               <input required type="string" name="shortUrl" id="shortUrl" class="form-control col mr-2" />
-              <input type="hidden" name="linkID" id="linkID" />
+			  <input type="hidden" name="prevShortUrl" id="prevShortUrl" />
+			  <input type="hidden" name="linkID" id="linkID" />
               <div>&nbsp;</div>
-              <select name="tag" id="tag" class="form-control col mr-2">
+              <select  name="tag" id="tag" class="form-control col mr-2" onchange="showfield(this.options[this.selectedIndex].id)">
                 <% tagDetails.forEach(tagDetail => { %> 
                
-                    <option selected ><%=tagDetail %></option>
+                    <option selected ><%=tagDetail.tag %></option>
                 <% }) %>
+				    <option id="other">-Add new tag-</option>
               </select>
+				<div id="div1"></div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -32,3 +36,4 @@
       </div>
     </div>
   </div>
+

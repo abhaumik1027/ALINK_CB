@@ -28,29 +28,31 @@ app.get("/", async function (req, res) {
         let message = ""
         let searchStr = ""
 
-             
-        if (app.get('callinIn')){
-                searchStr = app.get('urlSearch')
-                message = app.get('message')
-                app.set('callinIn', '')
-           
-        }
 
+        if (app.get('callinIn')) {
+            searchStr = app.get('urlSearch')
+            message = app.get('message')
+            app.set('callinIn', '')
+
+        }
        
-        let tagDetails = await cluster.query("SELECT DISTICT(`" + bucket._name + "`.tag) FROM `" + bucket._name + "` order by tag");
+
+        let tagDetails = await cluster.query("SELECT DISTINCT(`" + bucket._name + "`.tag) FROM `" + bucket._name + "` order by tag");
+
+        
         //Load the table with the searched tag
-        if(app.get('tag')){
+        if (app.get('tag')) {
             let tag = app.get('tag')
-            
+
             let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
             app.set('tag', '')
-            res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows})
+            res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows })
         }
-        else{
+        else {
             let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "`")
             res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows })
         }
-        
+
     }
     catch (err) {
         console.error(err);
@@ -62,34 +64,34 @@ app.get("/", async function (req, res) {
 app.post('/shortUrls', async function (req, res) {
     // Check  if url is valid
     if (!validUrl(req.body.fullUrl)) {
-        
+
         app.set('message', 'invalid_url')
         app.set('urlSearch', '')
         app.set('callinIn', 'callinIn')
         res.redirect('/');
-        
+
     }
     //Check if url/alink exists
     else {
         try {
             let lResult = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE full = '" + req.body.fullUrl + "'");
             let sResult = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.body.shortUrl + "'");
-            
+
             if (lResult.rows.length > 0) {
                 app.set('message', 'url_exists')
                 app.set('urlSearch', '')
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
             }
-            
+
             else if (sResult.rows.length > 0) {
                 app.set('message', 'alink_exists')
                 app.set('urlSearch', '')
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
             }
-            
-            else{
+
+            else {
                 let hashids = new Hashids();
                 let linkID = hashids.encode((new Date).getTime())
                 let clicks = 0
@@ -105,8 +107,8 @@ app.post('/shortUrls', async function (req, res) {
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
             }
-           
-            
+
+
         }
         catch (err) {
             console.error(err);
@@ -116,7 +118,7 @@ app.post('/shortUrls', async function (req, res) {
 })
 
 //Direct a alink to the long url
-app.get('/:shortUrl', async function (req, res){
+app.get('/:shortUrl', async function (req, res) {
     try {
         let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.params.shortUrl + "'");
         let status = '';
@@ -140,7 +142,7 @@ app.get('/:shortUrl', async function (req, res){
 })
 
 //Get `by tags
-app.get('/tag/:tag', async function (req, res){
+app.get('/tag/:tag', async function (req, res) {
     try {
         let tag = req.params.tag.toUpperCase();
         let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
@@ -183,7 +185,7 @@ app.get('/tag/:tag', async function (req, res){
 })*/
 
 //Delete an alink
-app.post('/delUrl', async function (req, res){
+app.post('/delUrl', async function (req, res) {
 
     try {
         await cluster.query("DELETE FROM `" + bucket._name + "`  WHERE linkID = '" + req.body.linkID + "'");
@@ -199,7 +201,7 @@ app.post('/delUrl', async function (req, res){
 })
 
 //Edit an alink
-app.post('/editUrl', async function (req, res){
+app.post('/editUrl', async function (req, res) {
 
     try {
         if (!validUrl(req.body.fullUrl)) {
@@ -208,17 +210,56 @@ app.post('/editUrl', async function (req, res){
             app.set('callinIn', 'callinIn')
             res.redirect('/');
         }
+        
         else {
-            
-            let creator = os.userInfo().username;
-            await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
-            app.set('message', 'alink_updated')
-            app.set('urlSearch', '')
-            app.set('callinIn', 'callinIn')
+            var noUpdate = 0
+           
+         
+            if (req.body.fullUrl != req.body.prevFullUrl) {
+                let longUrlCheck = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE full = '" + req.body.fullUrl + "'");
+                //url exists
+                if (longUrlCheck.rows.length > 0) {
+                    app.set('message', 'url_exists')
+                    app.set('urlSearch', '')
+                    app.set('callinIn', 'callinIn')
+                    noUpdate = 1
+                }
+               
+            }
+           
+            if (req.body.shortUrl != req.body.prevShortUrl) {
+                let shortUrlCheck = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.body.shortUrl + "'");
+                //alink exists
+                if (shortUrlCheck.rows.length > 0) {
+                    app.set('message', 'alink_exists')
+                    app.set('urlSearch', '')
+                    app.set('callinIn', 'callinIn')
+                    noUpdate = 1
+                }
+                
+            }
+            //check for tag
+            if (req.body.tag[1] == "") {
+                app.set('message', 'needs_tag')
+                app.set('urlSearch', '')
+                app.set('callinIn', 'callinIn')
+                noUpdate = 1
+            }
+           
+            if (noUpdate != 1) {
+                let creator = os.userInfo().username;
+                if (req.body.tag.length == 2) {
+                    req.body.tag = req.body.tag[1]
+                }
+                await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
+                app.set('message', 'alink_updated')
+                app.set('urlSearch', '')
+                app.set('callinIn', 'callinIn')
+            }
+           
             res.redirect('/');
-            
         }
-            
+
     }
     catch (err) {
         console.error(err);
@@ -226,7 +267,4 @@ app.post('/editUrl', async function (req, res){
     }
 })
 
-
-
 app.listen(process.env.PORT || 5000);
-

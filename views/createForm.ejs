@@ -9,7 +9,7 @@
     <% } %>
     <select name="tag" id="tag" class="form-control js-example-tags form-control" >
       <% tagDetails.forEach(tagDetail => { %>   
-        <option style="font-family: 'Prompt', sans-serif;"><%= tagDetail.toUpperCase() %></option>
+        <option style="font-family: 'Prompt', sans-serif;"><%= tagDetail.tag.toUpperCase() %></option>
       <% }) %>
     </select>
       

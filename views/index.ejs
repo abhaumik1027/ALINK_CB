@@ -32,25 +32,25 @@
                   if(shortUrl.tag.toUpperCase().includes("GENERAL")) {
                     tagClass = "badge-primary";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("DATA")) {
+                  else if(shortUrl.tag.toUpperCase().includes("DATA")) {
                     tagClass = "badge-secondary";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("SECURITY")) {
+                  else if(shortUrl.tag.toUpperCase().includes("SECURITY")) {
                     tagClass = "badge-danger";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("USER")) {
+                  else if(shortUrl.tag.toUpperCase().includes("USER")) {
                     tagClass = "badge-success";
                   }
-                  if(shortUrl.tag.toUpperCase().includes("EXT")) {
+                  else if(shortUrl.tag.toUpperCase().includes("EXT")) {
                     tagClass = "badge-warning";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("RESOURCE")) {
+                  else if(shortUrl.tag.toUpperCase().includes("RESOURCE")) {
                     tagClass = "badge-info";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("TECH")) {
+                  else if(shortUrl.tag.toUpperCase().includes("TECH")) {
                     tagClass = "badge-dark";
                   } 
-                  if(shortUrl.tag.toUpperCase().includes("TEST")) {
+                  else {
                     tagClass = "badge-light";
                   }  
                   

@@ -1,36 +1,40 @@
 <% if(message == 'search') { %> 
-    <div class="alert alert-info" role="alert">The A-Link you are looking for does not exists. You are welcome to create one.</div>
+    <div class="alert alert-info" role="alert">The <b>A-Link</b> you are looking for does not exists. You are welcome to create one.</div>
         
 <% } %>
 <% if(message == 'url_exists') { %> 
-    <div class="alert alert-warning" role="alert">The URL you want to add already exists.</div>
+    <div class="alert alert-danger" role="alert">The <b>URL</b> you want to add already exists.</div>
         
 <% } %>
 <% if(message == 'alink_exists') { %> 
-    <div class="alert alert-warning" role="alert">The A-Link you want to add already exists.</div>
+    <div class="alert alert-danger" role="alert">The <b>A-Link</b> you want to add already exists.</div>
         
 <% } %>
 <% if(message == 'invalid_url') { %> 
-    <div class="alert alert-warning" role="alert">Please enter a valid url.</div>
+    <div class="alert alert-danger" role="alert">Please enter a valid <b>URL</b>.</div>
         
 <% } %>
 <% if(message == 'alink_added') { %> 
-    <div class="alert alert-success" role="alert">Alink is successfully added.</div>
+    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully added.</div>
         
 <% } %>
 <% if(message == 'alink_updated') { %> 
-    <div class="alert alert-success" role="alert">Alink is successfully updated.</div>
+    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully updated.</div>
         
 <% } %>
 <% if(message == 'alink_deleted') { %> 
-    <div class="alert alert-success" role="alert">Alink is successfully deleted.</div>
+    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully deleted.</div>
         
 <% } %>
 <% if(message == 'no_tag') { %> 
-    <div class="alert alert-info" role="alert">There are no Alinks with the tag.</div>
+    <div class="alert alert-info" role="alert">There are no <b>Alinks</b> with the tag.</div>
         
 <% } %>
 <% if(message == 'no_author') { %> 
     <div class="alert alert-info" role="alert">There are no Alinks associated with the Creator.</div>
+        
+<% } %>
+<% if(message == 'needs_tag') { %> 
+    <div class="alert alert-danger" role="alert">A <b>Tag</b> must be selected.</div>
         
 <% } %>
