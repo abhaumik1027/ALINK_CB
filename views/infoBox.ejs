@@ -1,33 +1,34 @@
-<% if(message == 'search') { %> 
-    <div class="alert alert-info" role="alert">The <b>A-Link</b> you are looking for does not exists. You are welcome to create one.</div>
+<% let msgArray = message.split(/(\s+)/)%>
+<% if(msgArray[0] == 'search') { %> 
+    <div class="alert alert-info" role="alert">ALink <b><%= msgArray[2] %></b> you are looking for does not exists. You are welcome to create one.</div>
         
 <% } %>
 <% if(message == 'url_exists') { %> 
     <div class="alert alert-danger" role="alert">The <b>URL</b> you want to add already exists.</div>
         
 <% } %>
-<% if(message == 'alink_exists') { %> 
-    <div class="alert alert-danger" role="alert">The <b>A-Link</b> you want to add already exists.</div>
+<% if(msgArray[0] == 'alink_exists') { %> 
+    <div class="alert alert-danger" role="alert">ALink <b><%= msgArray[2] %></b> you want to add already exists.</div>
         
 <% } %>
 <% if(message == 'invalid_url') { %> 
     <div class="alert alert-danger" role="alert">Please enter a valid <b>URL</b>.</div>
         
 <% } %>
-<% if(message == 'alink_added') { %> 
-    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully added.</div>
+<% if(msgArray[0] == 'alink_added') { %> 
+    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully added.</div>
         
 <% } %>
-<% if(message == 'alink_updated') { %> 
-    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully updated.</div>
+<% if(msgArray[0] == "alink_updated") { %> 
+    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully updated.</div>
         
 <% } %>
-<% if(message == 'alink_deleted') { %> 
-    <div class="alert alert-success" role="alert"><b>Alink</b> is successfully deleted.</div>
+<% if(msgArray[0] == 'alink_deleted') { %> 
+    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully deleted.</div>
         
 <% } %>
-<% if(message == 'no_tag') { %> 
-    <div class="alert alert-info" role="alert">There are no <b>Alinks</b> with the tag.</div>
+<% if(msgArray[0] == 'no_tag') { %> 
+    <div class="alert alert-info" role="alert">There are no Alinks with the tag <b><%= msgArray[2] %></b>.</div>
         
 <% } %>
 <% if(message == 'no_author') { %> 

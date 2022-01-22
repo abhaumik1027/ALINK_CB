@@ -1,7 +1,6 @@
-<script type='text/javascript'>
 
-	//EDIT Modal
-	$('#exampleModal').on('show.bs.modal', function (event) {
+//Edit Modal
+$('#editModal').on('show.bs.modal', function (event) {
 	var button = $(event.relatedTarget) // Button that triggered the modal
 	var recipient = button.data('whatever')
 	const myArray = recipient.split(",");
@@ -12,10 +11,10 @@
 	modal.find('.modal-body #prevShortUrl').val(myArray[1])
 	modal.find('.modal-body #linkID').val(myArray[2])
 	modal.find('.modal-body #tag').val(myArray[3])
-	})
+})
 
-	//Alert Modal
-	$('#exampleModalAlert').on('show.bs.modal', function (event) {
+//Delete Modal
+$('#delModal').on('show.bs.modal', function (event) {
 	var button = $(event.relatedTarget) // Button that triggered the modal
 	var recipient = button.data('whatever')
 	const myArray = recipient.split(",");
@@ -23,23 +22,25 @@
 	modal.find('.modal-body #fullUrl').val(myArray[0])
 	modal.find('.modal-body #shortUrl').val(myArray[1])
 	modal.find('.modal-body #linkID').val(myArray[2])
-	})
+})
+
+//Help Modal
+$('#helpModal').on('show.bs.modal', function (event) {
+	var button = $(event.relatedTarget) // Button that triggered the modal
+	var recipient = button.data('whatever')
+	var modal = $(this)
+})
 
 
-	$(document).ready(function(){
+$(document).ready(function(){
 	$('#sortTab').dataTable();
-	});
+});
 
-	$(".js-example-tags").select2({
+$(".js-example-tags").select2({
 	tags: true
-	})
+})
 
-	function showfield(name){
-	if(name=='other')document.getElementById('div1').innerHTML='&nbsp;<input type="text" name="tag" class="form-control"/>';
+function showfield(name){
+	if(name=='other')document.getElementById('div1').innerHTML='&nbsp;<input type="text" name="tag" class="form-control" />';
 	else document.getElementById('div1').innerHTML='';
-	}
-
-
-
-
-</script>
+}

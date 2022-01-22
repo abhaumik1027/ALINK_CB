@@ -85,7 +85,7 @@ app.post('/shortUrls', async function (req, res) {
             }
 
             else if (sResult.rows.length > 0) {
-                app.set('message', 'alink_exists')
+                app.set('message', "alink_exists " + req.body.shortUrl + "")
                 app.set('urlSearch', '')
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
@@ -96,13 +96,14 @@ app.post('/shortUrls', async function (req, res) {
                 let linkID = hashids.encode((new Date).getTime())
                 let clicks = 0
                 let creator = os.userInfo().username
+                let tag = req.body.tag.toUpperCase()
 
                 let qs = await cluster.query("INSERT into `" + bucket._name + "` (KEY, VALUE) VALUES(\"" + linkID
                     + "\", {\"linkID\": \"" + linkID + "\" , \"full\": \"" + req.body.fullUrl + "\" , \"short\": \"" + req.body.shortUrl
                     + "\", \"clicks\": TONUMBER(\"" + clicks + "\"), \"date\": \"" + new Date().toLocaleDateString()
-                    + "\", \"tag\": \"" + req.body.tag + "\", \"creator\": \"" + creator + "\"})")
+                    + "\", \"tag\": \"" + tag + "\", \"creator\": \"" + creator + "\"})")
 
-                app.set('message', 'alink_added')
+                app.set('message', "alink_added " + req.body.shortUrl + "")
                 app.set('urlSearch', '')
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
@@ -129,7 +130,7 @@ app.get('/:shortUrl', async function (req, res) {
         else {
             if (req.params.shortUrl != 'favicon.ico') {
                 app.set('urlSearch', req.params.shortUrl)
-                app.set('message', 'search')
+                app.set('message', "search " + req.params.shortUrl + "")
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
             }
@@ -154,7 +155,7 @@ app.get('/tag/:tag', async function (req, res) {
             res.redirect('/');
         }
         else {
-            app.set('message', 'no_tag')
+            app.set('message', "no_tag " + tag + "")
             app.set('urlSearch', '')
             app.set('callinIn', 'callinIn')
             res.redirect('/');
@@ -189,7 +190,7 @@ app.post('/delUrl', async function (req, res) {
 
     try {
         await cluster.query("DELETE FROM `" + bucket._name + "`  WHERE linkID = '" + req.body.linkID + "'");
-        app.set('message', 'alink_deleted')
+        app.set('message', "alink_deleted " + req.body.shortUrl+ "")
         app.set('urlSearch', '')
         app.set('callinIn', 'callinIn')
         res.redirect('/');
@@ -231,7 +232,7 @@ app.post('/editUrl', async function (req, res) {
                 let shortUrlCheck = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short = '" + req.body.shortUrl + "'");
                 //alink exists
                 if (shortUrlCheck.rows.length > 0) {
-                    app.set('message', 'alink_exists')
+                    app.set('message', "alink_exists " + req.body.shortUrl + "")
                     app.set('urlSearch', '')
                     app.set('callinIn', 'callinIn')
                     noUpdate = 1
@@ -249,10 +250,10 @@ app.post('/editUrl', async function (req, res) {
             if (noUpdate != 1) {
                 let creator = os.userInfo().username;
                 if (req.body.tag.length == 2) {
-                    req.body.tag = req.body.tag[1]
+                    req.body.tag = req.body.tag[1].toUpperCase()
                 }
                 await cluster.query("UPDATE `" + bucket._name + "`  SET  full = '" + req.body.fullUrl + "' , short = '" + req.body.shortUrl + "' , date = '" + new Date().toLocaleDateString() + "', tag = '" + req.body.tag + "', creator = '" + creator + "' WHERE linkID = '" + req.body.linkID + "'");
-                app.set('message', 'alink_updated')
+                app.set('message', "alink_updated " + req.body.shortUrl+ "")
                 app.set('urlSearch', '')
                 app.set('callinIn', 'callinIn')
             }
