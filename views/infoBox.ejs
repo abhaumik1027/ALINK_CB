@@ -1,6 +1,14 @@
 <% let msgArray = message.split(/(\s+)/)%>
 <% if(msgArray[0] == 'search') { %> 
-    <div class="alert alert-info" role="alert">ALink <b><%= msgArray[2] %></b> you are looking for does not exists. You are welcome to create one.</div>
+    <div class="alert alert-info" role="alert">A-Link <b><%= msgArray[2] %></b> does not exists. You are welcome to create one.</div>
+        
+<% } %>
+<% if(msgArray[0] == 'yes_tag') { %> 
+    <div class="alert alert-info" role="alert">A-Links for the tag <b><%= msgArray[2] %></b> are listed in the table.</div>
+        
+<% } %>
+<% if(msgArray[0] == 'searchPartial') { %> 
+    <div class="alert alert-info" role="alert">A-Link <b><%= msgArray[2] %></b> does not exists. Below a-links/urls have the search string.</div>
         
 <% } %>
 <% if(message == 'url_exists') { %> 
@@ -8,7 +16,7 @@
         
 <% } %>
 <% if(msgArray[0] == 'alink_exists') { %> 
-    <div class="alert alert-danger" role="alert">ALink <b><%= msgArray[2] %></b> you want to add already exists.</div>
+    <div class="alert alert-danger" role="alert">A-Link <b><%= msgArray[2] %></b> you want to add already exists.</div>
         
 <% } %>
 <% if(message == 'invalid_url') { %> 
@@ -16,23 +24,23 @@
         
 <% } %>
 <% if(msgArray[0] == 'alink_added') { %> 
-    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully added.</div>
+    <div class="alert alert-success" role="alert">A-Link <b><%= msgArray[2] %></b> is successfully added.</div>
         
 <% } %>
 <% if(msgArray[0] == "alink_updated") { %> 
-    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully updated.</div>
+    <div class="alert alert-success" role="alert">A-Link <b><%= msgArray[2] %></b> is successfully updated.</div>
         
 <% } %>
 <% if(msgArray[0] == 'alink_deleted') { %> 
-    <div class="alert alert-success" role="alert">Alink <b><%= msgArray[2] %></b> is successfully deleted.</div>
+    <div class="alert alert-success" role="alert">A-Link <b><%= msgArray[2] %></b> is successfully deleted.</div>
         
 <% } %>
 <% if(msgArray[0] == 'no_tag') { %> 
-    <div class="alert alert-info" role="alert">There are no Alinks with the tag <b><%= msgArray[2] %></b>.</div>
+    <div class="alert alert-info" role="alert">There are no A-Links with the tag <b><%= msgArray[2] %></b>.</div>
         
 <% } %>
 <% if(message == 'no_author') { %> 
-    <div class="alert alert-info" role="alert">There are no Alinks associated with the Creator.</div>
+    <div class="alert alert-info" role="alert">There are no A-Links associated with the Creator.</div>
         
 <% } %>
 <% if(message == 'needs_tag') { %> 

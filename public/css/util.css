@@ -58,8 +58,17 @@ select, select option {
     outline: none;
 }
 
-    .tag-button:hover, .tag-button:focus {
-        outline: none;
-    }
+.tag-button:hover, .tag-button:focus {
+    outline: none;
+}
+
+.pillButton{
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+
 
 

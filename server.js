@@ -4,6 +4,8 @@ var Express = require("express");
 var BodyParser = require("body-parser");
 var Hashids = require("hashids");
 var os = require("os");
+var ipget = require('child_process');
+
 
 // User Creds.
 var endpoint = 'cb.tisntgxbzgvsjjcn.cloud.couchbase.com'
@@ -28,6 +30,22 @@ app.get("/", async function (req, res) {
         let message = ""
         let searchStr = ""
 
+        /*
+        var ip = '192.168.1.171';
+
+
+        ipget.exec('wmic.exe /node:"'+ip+'" ComputerSystem Get UserName', function (err, stdout, stderr) {
+            if (err) {
+                console.log("\n" + stderr);
+            } else {
+                console.log(stdout);
+                var last = stdout.split("/").pop();
+                console.log(last);
+                console.log(last);
+            }
+        });
+
+        */
 
         if (app.get('callinIn')) {
             searchStr = app.get('urlSearch')
@@ -46,6 +64,12 @@ app.get("/", async function (req, res) {
 
             let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE tag LIKE '%" + tag + "%'");
             app.set('tag', '')
+            res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows })
+        }
+        //Load the table with the searched alink
+        else if (app.get('alink')) {
+            let shortUrls = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short LIKE '%" + searchStr + "%' or full LIKE '%" + searchStr + "%'");
+            app.set('alink', '')
             res.render('index', { shortUrls: shortUrls.rows, message: message, searchStr: searchStr, tagDetails: tagDetails.rows })
         }
         else {
@@ -128,11 +152,21 @@ app.get('/:shortUrl', async function (req, res) {
             res.redirect(resUrl.rows[0].full);
         }
         else {
-            if (req.params.shortUrl != 'favicon.ico') {
+            let resUrl = await cluster.query("SELECT `" + bucket._name + "`.* FROM `" + bucket._name + "` WHERE short LIKE '%" + req.params.shortUrl + "%' or full LIKE '%" + req.params.shortUrl + "%'");
+            if (resUrl.rows.length > 0) {
                 app.set('urlSearch', req.params.shortUrl)
-                app.set('message', "search " + req.params.shortUrl + "")
+                app.set('alink', req.params.shortUrl)
+                app.set('message', "searchPartial " + req.params.shortUrl + "")
                 app.set('callinIn', 'callinIn')
                 res.redirect('/');
+            }
+            else {
+                if (req.params.shortUrl != 'favicon.ico') {
+                    app.set('urlSearch', req.params.shortUrl)
+                    app.set('message', "search " + req.params.shortUrl + "")
+                    app.set('callinIn', 'callinIn')
+                    res.redirect('/');
+                }
             }
         }
     }
@@ -150,7 +184,7 @@ app.get('/tag/:tag', async function (req, res) {
         if (resUrl.rows.length > 0) {
             app.set('tag', tag)
             app.set('urlSearch', '')
-            app.set('message', '')
+            app.set('message', "yes_tag " + tag + "")
             app.set('callinIn', 'callinIn')
             res.redirect('/');
         }

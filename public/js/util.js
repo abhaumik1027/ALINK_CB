@@ -44,3 +44,8 @@ function showfield(name){
 	if(name=='other')document.getElementById('div1').innerHTML='&nbsp;<input type="text" name="tag" class="form-control" />';
 	else document.getElementById('div1').innerHTML='';
 }
+
+function closeBtn() {
+	x = document.getElementById("showBtn");
+	x.display = "none";
+}

@@ -6,10 +6,18 @@
     <div class="container bg-light padtsm">
         
         <div class="container"><%- include('createForm')%></div>
+    </div>
+    <% let msgArray = message.split(/(\s+)/)%>
+    <% if((msgArray[0] == 'searchPartial') || (msgArray[0] == 'yes_tag') ) { %> 
+    <div id="showAll" style="padding-bottom: 10px; padding-top: 5px;">
+        
+        
+            <a href="/" type="submit" onclick="closeBtn()"><button id="showBtn" class="pillButton">
+            Show All</button></a>
         
     </div>
-    <div class='padtsm'></div>        
-
+    <% } %>
+   
         <table id="sortTab" class="table table-striped">
           <thead>
             <tr>
@@ -21,7 +29,7 @@
             </tr>
           </thead>
           <tbody>
-            <%
+          <%
               
               shortUrls.forEach(shortUrl => { %> 
               <tr class="search">
@@ -53,7 +61,6 @@
                       }  
                   
                  %> 
-
               <span class="badge <%= tagClass %> badge-pill"><%= shortUrl.tag %></span>
               </td>
                 <td><a style="text-decoration: none;" href="<%= shortUrl.short %>"><%= shortUrl.short %></a></td>
@@ -61,7 +68,6 @@
                 <td><%= shortUrl.date %></td>
                 <td>
                   <form class="form-inline">
-
                     <a class="btn" type="button" data-toggle="modal" 
                       data-target="#editModal" data-whatever="<%= shortUrl.full %>,<%= shortUrl.short %>,<%= shortUrl.linkID %>,<%= shortUrl.tag %>"">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="green" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -95,7 +101,7 @@
         <!-- Delete Modal -->
         <%- include('modal/editArea')%>
         <!-- Modal -->    
-      </div>
+      
     </div>
     
 <script type="text/javascript" src="js/util.js"></script>     
